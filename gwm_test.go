@@ -13,5 +13,5 @@ func init() {
 }
 
 func Test_GWM_ReadAttribute(t *testing.T) {
-	client.ReadAttribute("server-name")
+	client.ReadAttribute("server-state")
 }
