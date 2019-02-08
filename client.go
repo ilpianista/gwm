@@ -35,7 +35,7 @@ func NewClient(controller_host string, controller_port int, management_user stri
 	return client
 }
 
-func (c GWMClient) ReadAttribute(attribute string) {
+func (c GWMClient) ReadAttribute(attribute string) string {
 	command := map[string]interface{}{
 		"operation":   "read-attribute",
 		"name":        attribute,
@@ -72,7 +72,14 @@ func (c GWMClient) ReadAttribute(attribute string) {
 	if response.StatusCode != 200 {
 		log.Fatal(string(body))
 	} else {
-		// TODO parse the response
-		log.Print(string(body))
+		var result map[string]string
+
+		if err := json.Unmarshal(body, &result); err != nil {
+			log.Fatal(err)
+		} else {
+			return result["result"]
+		}
 	}
+
+	return ""
 }

@@ -1,6 +1,7 @@
 package gwm_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ilpianista/gwm"
@@ -13,5 +14,7 @@ func init() {
 }
 
 func Test_GWM_ReadAttribute(t *testing.T) {
-	client.ReadAttribute("server-state")
+	if strings.Compare("running", client.ReadAttribute("server-state")) != 0 {
+		t.Error("Cannot read attribute")
+	}
 }
