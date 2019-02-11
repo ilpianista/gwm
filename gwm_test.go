@@ -14,7 +14,11 @@ func init() {
 }
 
 func Test_GWM_ReadAttribute(t *testing.T) {
-	if strings.Compare("running", client.ReadAttribute("server-state")) != 0 {
+	attribute, err := client.ReadAttribute("server-state")
+
+	if err != nil {
+		t.Error(err)
+	} else if strings.Compare("running", attribute) != 0 {
 		t.Error("Cannot read attribute")
 	}
 }

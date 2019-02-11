@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	digestRequest "github.com/ilpianista/go-digest-request"
 )
@@ -35,7 +37,7 @@ func NewClient(controller_host string, controller_port int, management_user stri
 	return client
 }
 
-func (c GWMClient) ReadAttribute(attribute string) string {
+func (c GWMClient) ReadAttribute(attribute string) (string, error) {
 	command := map[string]interface{}{
 		"operation":   "read-attribute",
 		"name":        attribute,
@@ -44,7 +46,8 @@ func (c GWMClient) ReadAttribute(attribute string) string {
 
 	bytesRepresentation, err := json.Marshal(command)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+		return "", err
 	}
 
 	var response *http.Response
@@ -57,6 +60,7 @@ func (c GWMClient) ReadAttribute(attribute string) string {
 
 		if err != nil {
 			log.Fatal(err)
+			return "", err
 		}
 
 		response, err = r.Do(request)
@@ -64,22 +68,26 @@ func (c GWMClient) ReadAttribute(attribute string) string {
 
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, _ := ioutil.ReadAll(response.Body)
 
-	if response.StatusCode != 200 {
-		log.Fatal(string(body))
+	if response.StatusCode == 401 {
+		return "", errors.New("Unauthorized")
 	} else {
-		var result map[string]string
+		var result map[string]interface{}
 
 		if err := json.Unmarshal(body, &result); err != nil {
 			log.Fatal(err)
+			return "", err
 		} else {
-			return result["result"]
+			if strings.Compare("success", result["outcome"].(string)) == 0 {
+				return result["result"].(string), nil
+			} else {
+				return "", errors.New(result["failure-description"].(string))
+			}
 		}
 	}
-
-	return ""
 }
