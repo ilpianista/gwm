@@ -37,10 +37,15 @@ func NewClient(controller_host string, controller_port int, management_user stri
 	return client
 }
 
-func (c GWMClient) ReadAttribute(attribute string) (string, error) {
+func (c GWMClient) ReadAttribute(address string, attribute string) (string, error) {
+	sep := func(r rune) bool {
+		return r == '/' || r == '='
+	}
+
 	command := map[string]interface{}{
 		"operation":   "read-attribute",
 		"name":        attribute,
+		"address":     strings.FieldsFunc(address, sep),
 		"json.pretty": 1,
 	}
 
@@ -84,7 +89,12 @@ func (c GWMClient) ReadAttribute(attribute string) (string, error) {
 			return "", err
 		} else {
 			if strings.Compare("success", result["outcome"].(string)) == 0 {
-				return result["result"].(string), nil
+				switch result["result"].(type) {
+				case string:
+					return result["result"].(string), nil
+				default:
+					return result["result"].([]interface{})[0].(string), nil
+				}
 			} else {
 				return "", errors.New(result["failure-description"].(string))
 			}
