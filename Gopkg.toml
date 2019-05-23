@@ -1,0 +1,11 @@
+[[constraint]]
+  name = "github.com/ilpianista/go-digest-request"
+  version = "1.0.1"
+
+[[constraint]]
+  branch = "master"
+  name = "gitlab.com/ilpianista/gwm"
+
+[prune]
+  go-tests = true
+  unused-packages = true

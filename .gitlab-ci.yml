@@ -1,0 +1,28 @@
+image: golang:1.12
+
+stages:
+  - build
+  - test
+
+before_script:
+  - go get -u github.com/golang/dep/cmd/dep
+  - mkdir -p $GOPATH/src
+  - cd $GOPATH/src
+  - ln -s $CI_PROJECT_DIR
+  - cd $CI_PROJECT_NAME
+  - dep ensure
+  - apt-get update
+  - apt-get install openjdk-8-jdk-headless -y
+  - curl -O https://download.jboss.org/wildfly/9.0.2.Final/servlet/wildfly-servlet-9.0.2.Final.tar.gz
+  - tar xf wildfly-servlet-9.0.2.Final.tar.gz
+  - cd wildfly-servlet-9.0.2.Final/bin && ./add-user.sh -u admin -p password && (./standalone.sh &) && sleep 15s && cd -
+
+build:
+  stage: build
+  script:
+    - go build
+
+test:
+  stage: test
+  script:
+    - go test -v

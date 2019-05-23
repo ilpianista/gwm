@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ilpianista/gwm"
+	"gitlab.com/ilpianista/gwm"
 )
 
 var client *gwm.GWMClient
